@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
-import { createPublicClient, http } from 'viem';
+import { createPublicClient, http, isAddress } from 'viem';
 import { sepolia } from 'viem/chains';
 import { ethers } from 'ethers';
 import { createInstance, SepoliaConfig as RelayerSepoliaConfig } from '@zama-fhe/relayer-sdk/web';
 
 import { ConfidentialUSDTABI } from '../abi/ConfidentialUSDT';
 import { CUSDTStakingABI } from '../abi/CUSDTStaking';
+import { contractAddresses } from '../config/contracts';
 
 function Section({ title, children }: { title: string; children: any }) {
   return (
@@ -20,8 +21,8 @@ function Section({ title, children }: { title: string; children: any }) {
 
 export function StakingApp() {
   const { address, isConnected } = useAccount();
-  const [tokenAddress, setTokenAddress] = useState<string>('');
-  const [stakingAddress, setStakingAddress] = useState<string>('');
+  const [tokenAddress, setTokenAddress] = useState<string>(contractAddresses.confidentialUsdt);
+  const [stakingAddress, setStakingAddress] = useState<string>(contractAddresses.cusdtStaking);
   const [cusdtBalance, setCusdtBalance] = useState<bigint | null>(null);
   const [stakedBalance, setStakedBalance] = useState<bigint | null>(null);
   const [amount, setAmount] = useState<string>(''); // human readable (e.g., 1.23)
@@ -29,13 +30,18 @@ export function StakingApp() {
 
   const client = useMemo(() => createPublicClient({ chain: sepolia, transport: http() }), []);
 
+  const isTokenAddressValid = isAddress(tokenAddress || '');
+  const isStakingAddressValid = isAddress(stakingAddress || '');
+  const parsedAmount = Number.parseFloat(amount || '');
+  const isAmountValid = Number.isFinite(parsedAmount) && parsedAmount > 0;
+
   useEffect(() => {
     setCusdtBalance(null);
     setStakedBalance(null);
   }, [address, tokenAddress, stakingAddress]);
 
   const refresh = async () => {
-    if (!address || !tokenAddress || !stakingAddress) return;
+    if (!address || !isTokenAddressValid || !isStakingAddressValid) return;
     try {
       const instance = await createInstance(RelayerSepoliaConfig);
       // Read encrypted cUSDT balance
@@ -115,7 +121,7 @@ export function StakingApp() {
   };
 
   const faucet = async () => {
-    if (!tokenAddress) return;
+    if (!isTokenAddressValid) return;
     setBusy('Faucet');
     try {
       const provider = new ethers.BrowserProvider((window as any).ethereum);
@@ -130,7 +136,7 @@ export function StakingApp() {
   };
 
   const setOperator = async () => {
-    if (!tokenAddress || !stakingAddress) return;
+    if (!isTokenAddressValid || !isStakingAddressValid) return;
     setBusy('Set operator');
     try {
       const provider = new ethers.BrowserProvider((window as any).ethereum);
@@ -145,8 +151,8 @@ export function StakingApp() {
   };
 
   const stake = async () => {
-    if (!address || !tokenAddress || !stakingAddress) return;
-    const micros = BigInt(Math.floor(Number(amount) * 1_000_000));
+    if (!address || !isTokenAddressValid || !isStakingAddressValid || !isAmountValid) return;
+    const micros = BigInt(Math.floor(parsedAmount * 1_000_000));
     setBusy('Stake');
     try {
       const instance = await createInstance(RelayerSepoliaConfig);
@@ -168,8 +174,8 @@ export function StakingApp() {
   };
 
   const withdraw = async () => {
-    if (!address || !stakingAddress) return;
-    const micros = BigInt(Math.floor(Number(amount) * 1_000_000));
+    if (!address || !isStakingAddressValid || !isAmountValid) return;
+    const micros = BigInt(Math.floor(parsedAmount * 1_000_000));
     setBusy('Withdraw');
     try {
       const instance = await createInstance(RelayerSepoliaConfig);
@@ -209,9 +215,9 @@ export function StakingApp() {
               <input value={stakingAddress} onChange={e => setStakingAddress(e.target.value)} placeholder="0x..." style={{ width: '100%', padding: 8 }} />
             </label>
             <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={refresh} disabled={!isConnected || !tokenAddress || !stakingAddress}>Refresh</button>
-              <button onClick={faucet} disabled={!isConnected || !tokenAddress || busy !== null}>{busy === 'Faucet' ? 'Faucet…' : 'Faucet 100 cUSDT'}</button>
-              <button onClick={setOperator} disabled={!isConnected || !tokenAddress || !stakingAddress || busy !== null}>{busy === 'Set operator' ? 'Setting…' : 'Enable Operator'}</button>
+              <button onClick={refresh} disabled={!isConnected || !isTokenAddressValid || !isStakingAddressValid}>Refresh</button>
+              <button onClick={faucet} disabled={!isConnected || !isTokenAddressValid || busy !== null}>{busy === 'Faucet' ? 'Faucet…' : 'Faucet 100 cUSDT'}</button>
+              <button onClick={setOperator} disabled={!isConnected || !isTokenAddressValid || !isStakingAddressValid || busy !== null}>{busy === 'Set operator' ? 'Setting…' : 'Enable Operator'}</button>
             </div>
           </div>
         </Section>
@@ -226,8 +232,8 @@ export function StakingApp() {
         <Section title="Stake / Withdraw">
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
             <input type="number" min="0" step="0.000001" placeholder="Amount (cUSDT)" value={amount} onChange={e => setAmount(e.target.value)} style={{ padding: 8 }} />
-            <button onClick={stake} disabled={!isConnected || !tokenAddress || !stakingAddress || amount === '' || busy !== null}>{busy === 'Stake' ? 'Staking…' : 'Stake'}</button>
-            <button onClick={withdraw} disabled={!isConnected || !stakingAddress || amount === '' || busy !== null}>{busy === 'Withdraw' ? 'Withdrawing…' : 'Withdraw'}</button>
+            <button onClick={stake} disabled={!isConnected || !isTokenAddressValid || !isStakingAddressValid || !isAmountValid || busy !== null}>{busy === 'Stake' ? 'Staking…' : 'Stake'}</button>
+            <button onClick={withdraw} disabled={!isConnected || !isStakingAddressValid || !isAmountValid || busy !== null}>{busy === 'Withdraw' ? 'Withdrawing…' : 'Withdraw'}</button>
           </div>
         </Section>
       </div>
