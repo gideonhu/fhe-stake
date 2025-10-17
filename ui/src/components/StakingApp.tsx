@@ -13,8 +13,21 @@ import { useZamaInstance } from '../hooks/useZamaInstance';
 
 function Section({ title, children }: { title: string; children: any }) {
   return (
-    <section style={{ background: '#fff', padding: 16, borderRadius: 8, boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
-      <h2 style={{ marginTop: 0, fontSize: 18 }}>{title}</h2>
+    <section style={{
+      background: 'rgba(255, 255, 255, 0.95)',
+      backdropFilter: 'blur(10px)',
+      padding: '24px',
+      borderRadius: '16px',
+      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+      border: '1px solid rgba(255, 255, 255, 0.2)'
+    }}>
+      <h2 style={{
+        marginTop: 0,
+        fontSize: '20px',
+        fontWeight: '600',
+        color: '#1f2937',
+        marginBottom: '16px'
+      }}>{title}</h2>
       {children}
     </section>
   );
@@ -254,73 +267,285 @@ export function StakingApp() {
   }, [canDecrypt, hasDecryptableBalance, cusdtHandle, stakedHandle, isZamaLoading, zamaError, hasSigner]);
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: 24 }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <h1 style={{ fontSize: 20, margin: 0 }}>FHE Staking</h1>
+    <div style={{
+      maxWidth: '900px',
+      margin: '0 auto',
+      padding: '32px 24px',
+      position: 'relative',
+      zIndex: 1
+    }}>
+      <header style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '32px',
+        background: 'rgba(255, 255, 255, 0.1)',
+        backdropFilter: 'blur(10px)',
+        padding: '20px 24px',
+        borderRadius: '16px',
+        border: '1px solid rgba(255, 255, 255, 0.2)'
+      }}>
+        <h1 style={{
+          fontSize: '28px',
+          margin: 0,
+          fontWeight: '700',
+          color: '#ffffff',
+          textShadow: '0 2px 10px rgba(0, 0, 0, 0.2)'
+        }}>
+          🔐 FHE Staking
+        </h1>
         <ConnectButton />
       </header>
 
       {zamaError && (
-        <div style={{ background: '#fee2e2', border: '1px solid #fca5a5', color: '#991b1b', padding: 12, borderRadius: 6 }}>
-          Encryption service error: {zamaError}
+        <div style={{
+          background: 'rgba(254, 226, 226, 0.95)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid #fca5a5',
+          color: '#991b1b',
+          padding: '16px',
+          borderRadius: '12px',
+          marginBottom: '16px',
+          fontWeight: '500'
+        }}>
+          ⚠️ Encryption service error: {zamaError}
         </div>
       )}
 
       {!zamaError && isZamaLoading && (
-        <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1d4ed8', padding: 12, borderRadius: 6 }}>
-          Initializing encryption service…
+        <div style={{
+          background: 'rgba(239, 246, 255, 0.95)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid #bfdbfe',
+          color: '#1d4ed8',
+          padding: '16px',
+          borderRadius: '12px',
+          marginBottom: '16px',
+          fontWeight: '500'
+        }}>
+          ⏳ Initializing encryption service…
         </div>
       )}
 
-      <div style={{ display: 'grid', gap: 16 }}>
-        <Section title="Contracts">
-          <div style={{ display: 'grid', gap: 8 }}>
+      <div style={{ display: 'grid', gap: '20px' }}>
+        <Section title="📋 Contracts">
+          <div style={{ display: 'grid', gap: '12px' }}>
             <label>
-              <div style={{ fontSize: 12, marginBottom: 4 }}>ConfidentialUSDT address</div>
-              <input value={tokenAddress} onChange={e => setTokenAddress(e.target.value)} placeholder="0x..." style={{ width: '100%', padding: 8 }} />
+              <div style={{
+                fontSize: '13px',
+                marginBottom: '6px',
+                fontWeight: '500',
+                color: '#4b5563'
+              }}>ConfidentialUSDT address</div>
+              <input
+                value={tokenAddress}
+                onChange={e => setTokenAddress(e.target.value)}
+                placeholder="0x..."
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  borderRadius: '10px',
+                  border: '2px solid #e5e7eb',
+                  fontSize: '14px',
+                  fontFamily: 'monospace',
+                  transition: 'all 0.2s',
+                  outline: 'none'
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#667eea'}
+                onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+              />
             </label>
             <label>
-              <div style={{ fontSize: 12, marginBottom: 4 }}>CUSDTStaking address</div>
-              <input value={stakingAddress} onChange={e => setStakingAddress(e.target.value)} placeholder="0x..." style={{ width: '100%', padding: 8 }} />
+              <div style={{
+                fontSize: '13px',
+                marginBottom: '6px',
+                fontWeight: '500',
+                color: '#4b5563'
+              }}>CUSDTStaking address</div>
+              <input
+                value={stakingAddress}
+                onChange={e => setStakingAddress(e.target.value)}
+                placeholder="0x..."
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  borderRadius: '10px',
+                  border: '2px solid #e5e7eb',
+                  fontSize: '14px',
+                  fontFamily: 'monospace',
+                  transition: 'all 0.2s',
+                  outline: 'none'
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#667eea'}
+                onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+              />
             </label>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={refresh} disabled={!isConnected || !isTokenAddressValid || !isStakingAddressValid}>Refresh</button>
-            <button onClick={faucet} disabled={!isConnected || !isTokenAddressValid || !hasSigner || busy !== null}>{busy === 'Faucet' ? 'Faucet…' : 'Faucet 100 cUSDT'}</button>
+            <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+              <button
+                onClick={refresh}
+                disabled={!isConnected || !isTokenAddressValid || !isStakingAddressValid}
+                style={{
+                  padding: '12px 24px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: !isConnected || !isTokenAddressValid || !isStakingAddressValid ? '#d1d5db' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  color: 'white',
+                  fontWeight: '600',
+                  fontSize: '14px',
+                  cursor: !isConnected || !isTokenAddressValid || !isStakingAddressValid ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s',
+                  boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
+                }}
+              >
+                🔄 Refresh
+              </button>
+              <button
+                onClick={faucet}
+                disabled={!isConnected || !isTokenAddressValid || !hasSigner || busy !== null}
+                style={{
+                  padding: '12px 24px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: !isConnected || !isTokenAddressValid || !hasSigner || busy !== null ? '#d1d5db' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  color: 'white',
+                  fontWeight: '600',
+                  fontSize: '14px',
+                  cursor: !isConnected || !isTokenAddressValid || !hasSigner || busy !== null ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s',
+                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
+                }}
+              >
+                {busy === 'Faucet' ? '⏳ Faucet…' : '💧 Faucet 100 cUSDT'}
+              </button>
             </div>
           </div>
         </Section>
 
-        <Section title="Balances">
-          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center' }}>
-            <div>cUSDT: {formatBalance(cusdtBalance, cusdtHandle)}</div>
-            <div>Staked: {formatBalance(stakedBalance, stakedHandle)}</div>
-            <button onClick={decryptBalances} disabled={!isConnected || !canDecrypt || busy !== null}>
-              {busy === 'Decrypt' ? 'Decrypting…' : 'Decrypt balances'}
-            </button>
+        <Section title="💰 Balances">
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '16px',
+            marginBottom: '16px'
+          }}>
+            <div style={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              padding: '20px',
+              borderRadius: '12px',
+              color: 'white',
+              boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
+            }}>
+              <div style={{ fontSize: '13px', opacity: 0.9, marginBottom: '4px' }}>cUSDT Balance</div>
+              <div style={{ fontSize: '24px', fontWeight: '700' }}>{formatBalance(cusdtBalance, cusdtHandle)}</div>
+            </div>
+            <div style={{
+              background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+              padding: '20px',
+              borderRadius: '12px',
+              color: 'white',
+              boxShadow: '0 4px 12px rgba(240, 147, 251, 0.3)'
+            }}>
+              <div style={{ fontSize: '13px', opacity: 0.9, marginBottom: '4px' }}>Staked Balance</div>
+              <div style={{ fontSize: '24px', fontWeight: '700' }}>{formatBalance(stakedBalance, stakedHandle)}</div>
+            </div>
           </div>
+          <button
+            onClick={decryptBalances}
+            disabled={!isConnected || !canDecrypt || busy !== null}
+            style={{
+              padding: '12px 24px',
+              borderRadius: '10px',
+              border: 'none',
+              background: !isConnected || !canDecrypt || busy !== null ? '#d1d5db' : 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+              color: 'white',
+              fontWeight: '600',
+              fontSize: '14px',
+              cursor: !isConnected || !canDecrypt || busy !== null ? 'not-allowed' : 'pointer',
+              transition: 'all 0.2s',
+              boxShadow: '0 4px 12px rgba(251, 191, 36, 0.3)',
+              width: '100%'
+            }}
+          >
+            {busy === 'Decrypt' ? '⏳ Decrypting…' : '🔓 Decrypt balances'}
+          </button>
         </Section>
 
-        <Section title="Stake / Withdraw">
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-            <input type="number" min="0" step="0.000001" placeholder="Amount (cUSDT)" value={amount} onChange={e => setAmount(e.target.value)} style={{ padding: 8 }} />
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <Section title="⚡ Stake / Withdraw">
+          <div style={{ display: 'grid', gap: '16px' }}>
+            <input
+              type="number"
+              min="0"
+              step="0.000001"
+              placeholder="Amount (cUSDT)"
+              value={amount}
+              onChange={e => setAmount(e.target.value)}
+              style={{
+                padding: '14px 18px',
+                borderRadius: '10px',
+                border: '2px solid #e5e7eb',
+                fontSize: '16px',
+                fontWeight: '500',
+                transition: 'all 0.2s',
+                outline: 'none',
+                width: '100%'
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#667eea'}
+              onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+            />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px' }}>
               <button
                 onClick={stake}
                 disabled={!isConnected || !isTokenAddressValid || !isStakingAddressValid || !isAmountValid || !canUseFhe || !hasSigner || busy !== null}
+                style={{
+                  padding: '14px 20px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: !isConnected || !isTokenAddressValid || !isStakingAddressValid || !isAmountValid || !canUseFhe || !hasSigner || busy !== null ? '#d1d5db' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  color: 'white',
+                  fontWeight: '600',
+                  fontSize: '15px',
+                  cursor: !isConnected || !isTokenAddressValid || !isStakingAddressValid || !isAmountValid || !canUseFhe || !hasSigner || busy !== null ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s',
+                  boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
+                }}
               >
-                {busy === 'Stake' ? 'Staking…' : 'Stake'}
+                {busy === 'Stake' ? '⏳ Staking…' : '🚀 Stake'}
               </button>
               <button
                 onClick={withdraw}
                 disabled={!isConnected || !isStakingAddressValid || !isAmountValid || !canUseFhe || !hasSigner || busy !== null}
+                style={{
+                  padding: '14px 20px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: !isConnected || !isStakingAddressValid || !isAmountValid || !canUseFhe || !hasSigner || busy !== null ? '#d1d5db' : 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                  color: 'white',
+                  fontWeight: '600',
+                  fontSize: '15px',
+                  cursor: !isConnected || !isStakingAddressValid || !isAmountValid || !canUseFhe || !hasSigner || busy !== null ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s',
+                  boxShadow: '0 4px 12px rgba(240, 147, 251, 0.3)'
+                }}
               >
-                {busy === 'Withdraw' ? 'Withdrawing…' : 'Withdraw'}
+                {busy === 'Withdraw' ? '⏳ Withdrawing…' : '💸 Withdraw'}
               </button>
               <button
                 onClick={setOperator}
                 disabled={!isConnected || !isTokenAddressValid || !isStakingAddressValid || !hasSigner || busy !== null}
+                style={{
+                  padding: '14px 20px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: !isConnected || !isTokenAddressValid || !isStakingAddressValid || !hasSigner || busy !== null ? '#d1d5db' : 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
+                  color: 'white',
+                  fontWeight: '600',
+                  fontSize: '15px',
+                  cursor: !isConnected || !isTokenAddressValid || !isStakingAddressValid || !hasSigner || busy !== null ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s',
+                  boxShadow: '0 4px 12px rgba(6, 182, 212, 0.3)'
+                }}
               >
-                {busy === 'Set operator' ? 'Setting…' : 'Enable Operator'}
+                {busy === 'Set operator' ? '⏳ Setting…' : '🔑 Enable Operator'}
               </button>
             </div>
           </div>
