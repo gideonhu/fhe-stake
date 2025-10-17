@@ -128,8 +128,8 @@ export function StakingApp() {
     try {
       const signer = await signerPromise;
       if (!signer) return;
-      // Encryption must target the token contract (confidentialTransferFrom does fromExternal inside token)
-      const buffer = zamaInstance.createEncryptedInput(tokenAddress, await signer.getAddress());
+      // Encryption must target the staking contract (amount decoded inside staking contract)
+      const buffer = zamaInstance.createEncryptedInput(stakingAddress, await signer.getAddress());
       buffer.add64(micros);
       const encrypted = await buffer.encrypt();
 
@@ -256,7 +256,7 @@ export function StakingApp() {
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: 24 }}>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <h1 style={{ fontSize: 20, margin: 0 }}>cUSDT Staking</h1>
+        <h1 style={{ fontSize: 20, margin: 0 }}>FHE Staking</h1>
         <ConnectButton />
       </header>
 

@@ -4,7 +4,7 @@ import { sepolia } from 'wagmi/chains';
 const projectId = "YOUR_PROJECT_ID";
 
 export const config = getDefaultConfig({
-  appName: 'cUSDT Staking',
+  appName: 'FHE Staking',
   projectId,
   chains: [sepolia],
   ssr: false,
