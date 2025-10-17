@@ -177,8 +177,12 @@ export function StakingApp() {
       const signerAddress = await signer.getAddress();
 
       const decryptHandle = async (handle: string, contractAddress: string) => {
-        const handleBody = handle.toLowerCase().replace(/^0x/, '');
-        if (!handleBody || /^0+$/.test(handleBody)) {
+        if (typeof handle !== 'string') {
+          return 0n;
+        }
+        const trimmedHandle = handle.trim();
+        const handleBody = trimmedHandle.startsWith('0x') ? trimmedHandle.slice(2) : trimmedHandle;
+        if (!handleBody || /^0+$/i.test(handleBody)) {
           return 0n;
         }
         const keypair = zamaInstance.generateKeypair();
@@ -204,11 +208,15 @@ export function StakingApp() {
         if (!value) {
           return 0n;
         }
-        const valueBody = value.toLowerCase().replace(/^0x/, '');
-        if (!valueBody || /^0+$/.test(valueBody)) {
+        const valueString = typeof value === 'string' ? value.trim() : typeof value === 'bigint' ? `0x${value.toString(16)}` : value?.toString?.().trim();
+        if (!valueString) {
           return 0n;
         }
-        return BigInt(value);
+        const valueBody = valueString.startsWith('0x') ? valueString.slice(2) : valueString;
+        if (!valueBody || /^0+$/i.test(valueBody)) {
+          return 0n;
+        }
+        return BigInt(valueString);
       };
 
       if (usableCusdtHandle && isTokenAddressValid) {
