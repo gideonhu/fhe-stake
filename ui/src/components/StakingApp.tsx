@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
 import { createPublicClient, http, isAddress } from 'viem';
@@ -49,8 +49,15 @@ export function StakingApp() {
     setStakedHandle(null);
   }, [address, tokenAddress, stakingAddress]);
 
-  const refresh = async () => {
-    if (!address || !isTokenAddressValid || !isStakingAddressValid) return;
+  const refresh = useCallback(async () => {
+    if (!address) {
+      console.log('refresh skipped: missing address');
+      return;
+    }
+    if (!isTokenAddressValid || !isStakingAddressValid) {
+      console.log('refresh skipped: invalid contract addresses');
+      return;
+    }
     try {
       // Read encrypted cUSDT balance
       const encBal = await client.readContract({
@@ -59,9 +66,10 @@ export function StakingApp() {
         functionName: 'confidentialBalanceOf',
         args: [address],
       });
-      const hasEncryptedBalance = encBal !== ethers.ZeroHash;
-      setCusdtHandle(hasEncryptedBalance ? (encBal as string) : null);
-      setCusdtBalance(hasEncryptedBalance ? null : 0n);
+      const cusdtHandleRaw = encBal as string;
+      console.log('confidentialBalanceOf raw', cusdtHandleRaw);
+      setCusdtHandle(cusdtHandleRaw);
+      setCusdtBalance(null);
 
       // Read encrypted staked balance
       const encStaked = await client.readContract({
@@ -70,13 +78,18 @@ export function StakingApp() {
         functionName: 'stakedOf',
         args: [address],
       });
-      const hasEncryptedStaked = encStaked !== ethers.ZeroHash;
-      setStakedHandle(hasEncryptedStaked ? (encStaked as string) : null);
-      setStakedBalance(hasEncryptedStaked ? null : 0n);
+      const stakedHandleRaw = encStaked as string;
+      console.log('stakedOf raw', stakedHandleRaw);
+      setStakedHandle(stakedHandleRaw);
+      setStakedBalance(null);
     } catch (e) {
       console.error(e);
     }
-  };
+  }, [address, client, isStakingAddressValid, isTokenAddressValid, stakingAddress, tokenAddress]);
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
 
   const faucet = async () => {
     if (!isTokenAddressValid || !signerPromise) return;
@@ -154,7 +167,9 @@ export function StakingApp() {
 
   const decryptBalances = async () => {
     if (!address || busy !== null || !signerPromise || !zamaInstance) return;
-    if ((!cusdtHandle || !isTokenAddressValid) && (!stakedHandle || !isStakingAddressValid)) return;
+    const usableCusdtHandle = cusdtHandle;
+    const usableStakedHandle = stakedHandle;
+    if ((!usableCusdtHandle || !isTokenAddressValid) && (!usableStakedHandle || !isStakingAddressValid)) return;
     setBusy('Decrypt');
     try {
       const signer = await signerPromise;
@@ -162,6 +177,10 @@ export function StakingApp() {
       const signerAddress = await signer.getAddress();
 
       const decryptHandle = async (handle: string, contractAddress: string) => {
+        const handleBody = handle.toLowerCase().replace(/^0x/, '');
+        if (!handleBody || /^0+$/.test(handleBody)) {
+          return 0n;
+        }
         const keypair = zamaInstance.generateKeypair();
         const startTimestamp = Math.floor(Date.now() / 1000).toString();
         const durationDays = '7';
@@ -182,16 +201,23 @@ export function StakingApp() {
           durationDays,
         );
         const value = result[handle];
-        return value ? BigInt(value) : 0n;
+        if (!value) {
+          return 0n;
+        }
+        const valueBody = value.toLowerCase().replace(/^0x/, '');
+        if (!valueBody || /^0+$/.test(valueBody)) {
+          return 0n;
+        }
+        return BigInt(value);
       };
 
-      if (cusdtHandle && isTokenAddressValid) {
-        const value = await decryptHandle(cusdtHandle, tokenAddress);
+      if (usableCusdtHandle && isTokenAddressValid) {
+        const value = await decryptHandle(usableCusdtHandle, tokenAddress);
         setCusdtBalance(value);
       }
 
-      if (stakedHandle && isStakingAddressValid) {
-        const value = await decryptHandle(stakedHandle, stakingAddress);
+      if (usableStakedHandle && isStakingAddressValid) {
+        const value = await decryptHandle(usableStakedHandle, stakingAddress);
         setStakedBalance(value);
       }
     } catch (error) {
@@ -211,7 +237,13 @@ export function StakingApp() {
     return '-';
   };
 
-  const canDecrypt = canUseFhe && hasSigner && ((cusdtHandle && isTokenAddressValid) || (stakedHandle && isStakingAddressValid));
+  const hasDecryptableBalance = (isTokenAddressValid && Boolean(cusdtHandle)) ||
+    (isStakingAddressValid && Boolean(stakedHandle));
+  const canDecrypt = !isZamaLoading && !zamaError && hasDecryptableBalance;
+
+  useEffect(() => {
+    console.log('canDecrypt state', { canDecrypt, hasDecryptableBalance, cusdtHandle, stakedHandle, isZamaLoading, zamaError, hasSigner });
+  }, [canDecrypt, hasDecryptableBalance, cusdtHandle, stakedHandle, isZamaLoading, zamaError, hasSigner]);
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: 24 }}>
@@ -245,7 +277,7 @@ export function StakingApp() {
             </label>
             <div style={{ display: 'flex', gap: 8 }}>
               <button onClick={refresh} disabled={!isConnected || !isTokenAddressValid || !isStakingAddressValid}>Refresh</button>
-              <button onClick={faucet} disabled={!isConnected || !isTokenAddressValid || !hasSigner || busy !== null}>{busy === 'Faucet' ? 'Faucet…' : 'Faucet 100 cUSDT'}</button>
+            <button onClick={faucet} disabled={!isConnected || !isTokenAddressValid || !hasSigner || busy !== null}>{busy === 'Faucet' ? 'Faucet…' : 'Faucet 100 cUSDT'}</button>
             </div>
           </div>
         </Section>
