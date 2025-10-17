@@ -26,8 +26,12 @@ contract CUSDTStaking is SepoliaConfig {
     /// @param encryptedAmount external encrypted amount (target: token contract)
     /// @param inputProof zk-proof validating the encrypted input
     function stake(externalEuint64 encryptedAmount, bytes calldata inputProof) external {
+        // Decode external encrypted amount for transfer
+        euint64 amount = FHE.fromExternal(encryptedAmount, inputProof);
+        FHE.allow(amount, address(token));
+
         // Pull encrypted tokens from user into this contract
-        euint64 transferred = token.confidentialTransferFrom(msg.sender, address(this), encryptedAmount, inputProof);
+        euint64 transferred = token.confidentialTransferFrom(msg.sender, address(this), amount);
 
         // Update user staked balance
         euint64 current = _staked[msg.sender];
