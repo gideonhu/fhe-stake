@@ -1,11 +1,7 @@
 import { getDefaultConfig } from '@rainbow-me/rainbowkit';
 import { sepolia } from 'wagmi/chains';
 
-const projectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID;
-
-if (!projectId) {
-  throw new Error('VITE_WALLETCONNECT_PROJECT_ID must be set');
-}
+const projectId = "YOUR_PROJECT_ID";
 
 export const config = getDefaultConfig({
   appName: 'cUSDT Staking',
