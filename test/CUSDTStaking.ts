@@ -33,7 +33,7 @@ describe("CUSDTStaking (local mock)", function () {
 
     // Stake 1_000_000 (1 cUSDT)
     const encAmtStake = await fhevm
-      .createEncryptedInput(cusdtAddress, stakingAddress)
+      .createEncryptedInput(stakingAddress, alice.address)
       .add64(1_000_000n)
       .encrypt();
     await staking.connect(alice).stake(encAmtStake.handles[0], encAmtStake.inputProof);
