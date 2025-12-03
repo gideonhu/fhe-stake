@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.27;
 
-import {SepoliaConfig} from "@fhevm/solidity/config/ZamaConfig.sol";
+import {ZamaEthereumConfig} from "@fhevm/solidity/config/ZamaConfig.sol";
 import {FHE, euint64, externalEuint64, ebool} from "@fhevm/solidity/lib/FHE.sol";
-import {IConfidentialFungibleToken} from "new-confidential-contracts/interfaces/IConfidentialFungibleToken.sol";
-import {FHESafeMath} from "new-confidential-contracts/utils/FHESafeMath.sol";
+import {ERC7984} from "confidential-contracts-v91/contracts/token/ERC7984/ERC7984.sol";
+import {FHESafeMath} from "confidential-contracts-v91/contracts/utils/FHESafeMath.sol";
 
 /// @title cUSDT Staking Contract
 /// @notice Stake and withdraw cUSDT (ConfidentialUSDT) using Zama FHEVM encrypted amounts
-contract CUSDTStaking is SepoliaConfig {
-    IConfidentialFungibleToken public immutable token;
+contract CUSDTStaking is ZamaEthereumConfig {
+    ERC7984 public immutable token;
 
     mapping(address => euint64) private _staked;
     euint64 private _totalStaked;
@@ -19,7 +19,7 @@ contract CUSDTStaking is SepoliaConfig {
 
     constructor(address tokenAddress) {
         require(tokenAddress != address(0), "Invalid token");
-        token = IConfidentialFungibleToken(tokenAddress);
+        token = ERC7984(tokenAddress);
     }
 
     /// @notice Stake encrypted cUSDT amount into this contract
